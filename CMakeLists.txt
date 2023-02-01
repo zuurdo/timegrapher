@@ -10,8 +10,8 @@ link_directories(/usr/local/lib)
 add_library(portaudio /usr/local/lib/libportaudio.a)
 set_target_properties(portaudio PROPERTIES LINKER_LANGUAGE CXX)
 
-add_executable(timegrapher main.cpp)
-#add_executable(timegrapher test_wire.cpp)
+#add_executable(timegrapher main.cpp)
+add_executable(timegrapher lib/portaudio/examples/paex_record.c)
 
 target_link_libraries(timegrapher libportaudio.a)
 
