@@ -49,7 +49,7 @@
 #define SAMPLE_RATE  (44100)
 #define FRAMES_PER_BUFFER (512)
 #define NUM_SECONDS     (5)
-#define NUM_CHANNELS    (2)
+#define NUM_CHANNELS    (4)
 /* #define DITHER_FLAG     (paDitherOff) */
 #define DITHER_FLAG     (0) /**/
 /** Set to 1 if you want to capture the recording to a file. */
@@ -133,6 +133,7 @@ static int recordCallback( const void *inputBuffer, void *outputBuffer,
         for( i=0; i<framesToCalc; i++ )
         {
             *wptr++ = *rptr++;  /* left */
+            printf(" value %f \n",*rptr);
             if( NUM_CHANNELS == 2 ) *wptr++ = *rptr++;  /* right */
         }
     }
@@ -229,7 +230,7 @@ int main(void)
         fprintf(stderr,"Error: No default input device.\n");
         goto done;
     }
-    inputParameters.channelCount = 2;                    /* stereo input */
+    inputParameters.channelCount = 1;                    /* stereo input */
     inputParameters.sampleFormat = PA_SAMPLE_TYPE;
     inputParameters.suggestedLatency = Pa_GetDeviceInfo( inputParameters.device )->defaultLowInputLatency;
     inputParameters.hostApiSpecificStreamInfo = NULL;
@@ -305,7 +306,7 @@ int main(void)
         fprintf(stderr,"Error: No default output device.\n");
         goto done;
     }
-    outputParameters.channelCount = 2;                     /* stereo output */
+    outputParameters.channelCount = 1;                     /* stereo output */
     outputParameters.sampleFormat =  PA_SAMPLE_TYPE;
     outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = NULL;
