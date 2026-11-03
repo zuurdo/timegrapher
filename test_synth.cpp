@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <random>
 
-#include "tg_core.hpp"
+#include "include/tg_core.hpp"
 
 int main(int argc, char** argv) {
   double bph = argc > 1 ? atof(argv[1]) : 28800;
