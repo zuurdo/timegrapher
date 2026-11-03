@@ -8,6 +8,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 include(FetchContent)
 
 # FTXUI (terminal UI)
@@ -17,6 +19,7 @@ FetchContent_Declare(ftxui
 set(FTXUI_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(FTXUI_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(FTXUI_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+
 FetchContent_MakeAvailable(ftxui)
 
 # PortAudio: use the system one (macOS: brew install portaudio, Linux: libportaudio-dev)
@@ -34,4 +37,6 @@ target_link_libraries(timegrapher PRIVATE ${PORTAUDIO_LIBRARY}
   ftxui::component ftxui::dom ftxui::screen)
 
 # Offline test of the DSP core on synthetic watch audio (no audio hardware needed)
-add_executable(test_synth test_synth.cpp)
+add_executable(test_synth tests/test_synth.cpp)
+
+
