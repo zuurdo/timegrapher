@@ -1,47 +1,37 @@
-cmake_minimum_required(VERSION 3.2)
-project(timegrapher)
+cmake_minimum_required(VERSION 3.16)
+project(timegrapher CXX)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
+set(CMAKE_OSX_SYSROOT "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")
 
-set(PORTAUDIO_DIR "/Users/raulmartinpintos/Documents/repositories/timegrapher/lib/portaudio")
-#set(GCC_COVERAGE_COMPILE_FLAGS "-lc++")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS}" )
+include(FetchContent)
 
+# FTXUI (terminal UI)
+FetchContent_Declare(ftxui
+  GIT_REPOSITORY https://github.com/ArthurSonzogni/FTXUI
+  GIT_TAG v5.0.0)
+set(FTXUI_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(FTXUI_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(FTXUI_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(ftxui)
 
-
-find_package(PythonLibs REQUIRED)
-find_package(Matplot++ QUIET)
-if(NOT Matplot++_FOUND)
-    # Put your FetchContent or CPM.cmake script here
-    add_subdirectory(lib/matplotplusplus)
+# PortAudio: use the system one (macOS: brew install portaudio, Linux: libportaudio-dev)
+find_path(PORTAUDIO_INCLUDE_DIR portaudio.h
+  HINTS /opt/homebrew/include /usr/local/include)
+find_library(PORTAUDIO_LIBRARY portaudio
+  HINTS /opt/homebrew/lib /usr/local/lib)
+if(NOT PORTAUDIO_INCLUDE_DIR OR NOT PORTAUDIO_LIBRARY)
+  message(FATAL_ERROR "PortAudio not found (brew install portaudio)")
 endif()
 
-include_directories(${PYTHON_INCLUDE_DIRS})
-include_directories(/opt/homebrew/lib/python3.11/site-packages/numpy/core/include)
-include_directories(/opt/homebrew/Cellar/fftw/3.3.10_1/include)
-include_directories(/opt/homebrew/Cellar/matplotplusplus/1.2.1/include)
-include_directories(IMGUI_DIR)
+add_executable(timegrapher main.cpp)
+target_include_directories(timegrapher PRIVATE ${PORTAUDIO_INCLUDE_DIR})
+target_link_libraries(timegrapher PRIVATE ${PORTAUDIO_LIBRARY}
+  ftxui::component ftxui::dom ftxui::screen)
 
-find_library(COREAUDIO_FRAMEWORK CoreAudio)
-find_library(AUDIOTOOLBOX_FRAMEWORK AudioToolbox)
-find_library(AUDIOUNIT_FRAMEWORK AudioUnit)
-find_library(CORESERVICES_FRAMEWORK CoreServices)
-find_library(CRBON_FRAMEWORK Carbon)
-#find_library(MATPLOT_FRAMEWORK matplot)
-
-add_executable(timegrapher
-        include/matplotlibcpp.h
-        main.cpp)
-#add_executable(timegrapher lib/portaudio/examples/paex_read_write_wire.c)
-
-
-target_link_libraries(timegrapher ${PYTHON_LIBRARIES})
-target_link_libraries(timegrapher /Users/raulmartinpintos/Documents/repositories/timegrapher/lib/portaudio/lib/.libs/libportaudio.a)
-target_link_libraries(timegrapher /opt/homebrew/Cellar/fftw/3.3.10_1/lib/libfftw3.a)
-target_link_libraries(timegrapher ${COREAUDIO_FRAMEWORK})
-target_link_libraries(timegrapher ${AUDIOTOOLBOX_FRAMEWORK})
-target_link_libraries(timegrapher ${AUDITUNIT_FRAMEWORK})
-target_link_libraries(timegrapher ${CORESERVICES_FRAMEWORK})
-target_link_libraries(timegrapher ${CARBON_FRAMEWORK})
-target_link_libraries(timegrapher Matplot++::matplot)
-
+# Offline test of the DSP core on synthetic watch audio (no audio hardware needed)
+add_executable(test_synth test_synth.cpp)
